@@ -1,7 +1,6 @@
 # This sample shows you how scrape comments from a project.
 # Pass the root_asset_id and a developer token in to get_all_project_comments
-# to scrape the comments from a project. This sample does not include
-# version stacks.
+# to scrape the comments from a project.
 
 from frameioclient import FrameioClient
 from flask import Flask, jsonify, request
