@@ -25,6 +25,13 @@ def all_comments(client, asset_id, comment_list):
         if item['type'] == "folder" :
             if item['item_count'] > 0:
                 all_comments(client, item['id'], comment_list)
+        if item['type'] == "version_stack":
+            vfiles = client.get_asset_children(item['id'])
+            for item in vfiles.results:
+                if item['type'] == "file":
+                    if item['comment_count'] > 0:
+                        comments = client.get_comments(item['id'])
+                        comment_list.append(comments)
 
 # Takes a root asset ID for a project and a developer token.
 # Returns a comment list with all assets
