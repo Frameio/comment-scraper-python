@@ -14,6 +14,9 @@ The comment scraper takes a root asset ID (`root_asset_id`) for a project and a 
 
 The comment scraper does not handle version stacks. 
 
+# Try it Now
+You can see a Flask app using the comment scraper on Glitch here: https://glitch.com/~frameio-comment-scraper. You will need a developer token and you will need to retrieve the root asset ID to try it out. 
+
 # Pre-requisites
 
 * Developer account with Frame.io - [https://developer.frame.io](https://developer.frame.io)
@@ -35,4 +38,5 @@ The sample is written in Python 3. You run it by doing the following:
 1. Run the sample with `$ python comment_scrape.py`
 
 2. Retrieve the .csv file. It will appear in the same folder that you run comment_scrape.py from and be named **output.csv**.
+
 
