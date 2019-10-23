@@ -12,8 +12,6 @@ The comment scraper takes a root asset ID (`root_asset_id`) for a project and a 
 2. Puts these assets into a list.
 3. Flattens the list and outputs it into a .csv file. 
 
-The comment scraper does not handle version stacks. 
-
 # Try it Now
 You can see a Flask app using the comment scraper on Glitch here: https://glitch.com/~frameio-comment-scraper. You will need a developer token and you will need to retrieve the root asset ID to try it out. 
 
