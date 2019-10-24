@@ -1,13 +1,14 @@
 # This sample shows you how scrape comments from a project.
 # Pass the root_asset_id and a developer token in to get_all_project_comments
-# to scrape the comments from a project.
+# to scrape the comments from a project. This sample does not include
+# version stacks.
 
 from frameioclient import FrameioClient
 from flask import Flask, jsonify, request
 import requests, json, pprint, csv, itertools
 
-ROOT_ASSET_ID = "Put your root asset ID here"
-TOKEN = "Put your developer token here"
+ROOT_ASSET_ID = "2cb29192-025b-4c11-b908-9b4331baa67a"
+TOKEN = "fio-u-m6BqazQLLTgKc6fatHZ-gncudL7-3WUZhZ4a7W_RfV7cd9waZ8tNhOhFd1wZ-RVF"
 # Function for grabbing comments from assets. It's used by
 # get_all_project_comments. It takes an initialized client,
 # asset_id, and reference to an empty list. It returns
@@ -32,6 +33,7 @@ def all_comments(client, asset_id, comment_list):
                         comments = client.get_comments(item['id'])
                         comment_list.append(comments)
 
+
 # Takes a root asset ID for a project and a developer token.
 # Returns a comment list with all assets
 def get_all_project_comments(root_asset_id, token):
@@ -53,11 +55,12 @@ response_lists = [r.results for r in responses]
 # Flatten out response_lists so that there's only one item in each part of the list
 flat_response_list = list(itertools.chain.from_iterable(response_lists))
 
+pprint.pprint(flat_response_list)
 # Now we can use list comprehension to grab what we want from each block in the list and make a new flat list.
-list_for_csv = [[o['text'], o['id'], o['owner_id'], o['timestamp'], o['updated_at']] for o in flat_response_list]
+list_for_csv = [[o['text'], o['parent_id'], o['asset_id'], o['owner_id'], o['owner']['email'], o['timestamp'], o['updated_at']] for o in flat_response_list]
 
 # Let's write our new list out to a .csv file. We'll add a heading.
 with open("output.csv", 'w') as myfile:
      wr = csv.writer(myfile, dialect='excel')
-     wr.writerow(['Comment', 'Asset ID', 'Owner ID', 'Timestamp', 'Updated At'])
+     wr.writerow(['Comment', 'Parent ID', 'Asset ID', 'Owner ID', 'Email', 'Timestamp', 'Updated At'])
      wr.writerows(list_for_csv)
