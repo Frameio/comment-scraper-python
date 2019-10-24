@@ -4,7 +4,6 @@
 # version stacks.
 
 from frameioclient import FrameioClient
-from flask import Flask, jsonify, request
 import requests, json, csv, itertools
 
 ROOT_ASSET_ID = "Put your root asset ID here."
