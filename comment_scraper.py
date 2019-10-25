@@ -18,17 +18,17 @@ def all_comments(client, asset_id, comment_list):
 
     for asset in files:
         if asset['type'] == "file":
-
             if asset['comment_count'] > 0:
 
-# You can't get the asset name from the get_comments call, so we are saving it
+# You can't get the asset name or the parent ID from the get_comments call, so we are saving it
 # from the get_asset_children call, so we can append it to each comment for use
 # later.
-
+                asset_parent_id = asset['parent_id']
                 asset_name = asset['name']
                 comments = client.get_comments(asset['id'])
                 my_comment_list = [comment for comment in comments.results]
                 for object in my_comment_list:
+                    object.update({'parent_id':asset_parent_id})
                     object.update({'name':asset_name})
                 comment_list.append(my_comment_list)
 
@@ -38,19 +38,23 @@ def all_comments(client, asset_id, comment_list):
 
         if asset['type'] == "version_stack":
 
-# Saving the asset name.
+# Saving the asset name and parent ID.
 
             asset_name = asset['name']
+            parent_id = asset['parent_id']
             vfiles = client.get_asset_children(asset['id'])
+
             for asset in vfiles.results:
+                asset_name = asset['name']
+                parent_id = asset['parent_id']
                 if asset['type'] == "file":
                     if asset['comment_count'] > 0:
                         comments = client.get_comments(asset['id'])
                         my_comment_list = [comment for comment in comments.results]
                         for object in my_comment_list:
+                            object.update({'parent_id':parent_id})
                             object.update({'name':asset_name})
                         comment_list.append(my_comment_list)
-
 
 # Takes a root asset ID for a project and a developer token.
 # Returns a comment list with all assets
