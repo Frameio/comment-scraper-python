@@ -11,32 +11,50 @@ TOKEN = "Put your developer token here."
 # Function for grabbing comments from assets. It's used by
 # get_all_project_comments. It takes an initialized client,
 # asset_id, and reference to an empty list. It returns
-# all comments on all assets. This sample does not include
-# version stacks.
+# all comments on all assets.
 
 def all_comments(client, asset_id, comment_list):
     files = client.get_asset_children(asset_id)
 
-    for item in files:
-        if item['type'] == "file":
-            if item['comment_count'] > 0:
-                comments = client.get_comments(item['id'])
-                comment_list.append(comments)
+    for asset in files:
+        if asset['type'] == "file":
 
-        if item['type'] == "folder" :
-            if item['item_count'] > 0:
-                all_comments(client, item['id'], comment_list)
-        if item['type'] == "version_stack":
-            vfiles = client.get_asset_children(item['id'])
-            for item in vfiles.results:
-                if item['type'] == "file":
-                    if item['comment_count'] > 0:
-                        comments = client.get_comments(item['id'])
-                        comment_list.append(comments)
+            if asset['comment_count'] > 0:
+
+# You can't get the asset name from the get_comments call, so we are saving it
+# from the get_asset_children call, so we can append it to each comment for use
+# later.
+
+                asset_name = asset['name']
+                comments = client.get_comments(asset['id'])
+                my_comment_list = [comment for comment in comments.results]
+                for object in my_comment_list:
+                    object.update({'name':asset_name})
+                comment_list.append(my_comment_list)
+
+        if asset['type'] == "folder":
+            if asset['item_count'] > 0:
+                all_comments(client, asset['id'], comment_list)
+
+        if asset['type'] == "version_stack":
+
+# Saving the asset name.
+
+            asset_name = asset['name']
+            vfiles = client.get_asset_children(asset['id'])
+            for asset in vfiles.results:
+                if asset['type'] == "file":
+                    if asset['comment_count'] > 0:
+                        comments = client.get_comments(asset['id'])
+                        my_comment_list = [comment for comment in comments.results]
+                        for object in my_comment_list:
+                            object.update({'name':asset_name})
+                        comment_list.append(my_comment_list)
 
 
 # Takes a root asset ID for a project and a developer token.
 # Returns a comment list with all assets
+
 def get_all_project_comments(root_asset_id, token):
     comment_list = []
     client = FrameioClient(token)
@@ -46,21 +64,13 @@ def get_all_project_comments(root_asset_id, token):
     return comment_list
 
 # Get all the comments on the project you choose by providing a root asset ID and a developer token.
+
 responses = get_all_project_comments(ROOT_ASSET_ID, TOKEN)
 
-# The responses list comes back as a list of Paginated Objects.
-# This makes them separate out into lists of lists.
+# The response list comes back as a list of lists.
+# Flatten out responses so that there's only one item in each part of the list
 
-response_lists = [r.results for r in responses]
-
-# Flatten out response_lists so that there's only one item in each part of the list
-flat_response_list = list(itertools.chain.from_iterable(response_lists))
-
-# Retrieve the asset name and add it to the end of each list so we can associate it with the asset ID later.
-client = FrameioClient(TOKEN)
-for item in flat_response_list:
-    asset = client.get_asset(item['asset_id'])
-    item['name'] = asset['name']
+flat_response_list = list(itertools.chain.from_iterable(responses))
 
 # Now we can use list comprehension to grab what we want from each block in the list and make a new flat list.
 list_for_csv = [[o['text'], o['parent_id'], o['asset_id'], o['name'], o['owner_id'], o['owner']['email'], o['timestamp'], o['updated_at']] for o in flat_response_list]
