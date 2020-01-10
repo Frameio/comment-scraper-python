@@ -1,13 +1,13 @@
-# This sample shows you how scrape comments from a project.
+# This sample shows you how to scrape comments from a project.
 # Pass the root_asset_id and a developer token in to get_all_project_comments
-# to scrape the comments from a project. This sample does not include
-# version stacks.
+# to scrape the comments from a project. 
 
 from frameioclient import FrameioClient
 import requests, json, csv, itertools
 
 ROOT_ASSET_ID = "Put your root asset ID here."
 TOKEN = "Put your developer token here."
+
 # Function for grabbing comments from assets. It's used by
 # get_all_project_comments. It takes an initialized client,
 # asset_id, and reference to an empty list. It returns
@@ -23,6 +23,7 @@ def all_comments(client, asset_id, comment_list):
 # You can't get the asset name or the parent ID from the get_comments call, so we are saving it
 # from the get_asset_children call, so we can append it to each comment for use
 # later.
+
                 asset_parent_id = asset['parent_id']
                 asset_name = asset['name']
                 comments = client.get_comments(asset['id'])
@@ -57,7 +58,7 @@ def all_comments(client, asset_id, comment_list):
                         comment_list.append(my_comment_list)
 
 # Takes a root asset ID for a project and a developer token.
-# Returns a comment list with all assets
+# Returns a comment list with all assets.
 
 def get_all_project_comments(root_asset_id, token):
     comment_list = []
