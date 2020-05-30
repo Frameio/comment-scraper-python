@@ -1,6 +1,10 @@
-# This sample shows you how to scrape comments from a project.
-# Pass the root_asset_id and a developer token in to get_all_project_comments
-# generate_csv will create a CSV containing your comments.
+###################################
+# This scraper shows you how to gather comments from
+# a Frame.io project and write to a tidy CSV.
+# Comments are gathered recursively from the 
+# Folders, files and version stacks within your project.
+###################################
+
 
 from frameioclient import FrameioClient
 import requests, json, csv
@@ -8,37 +12,34 @@ from os import getenv
 from itertools import chain
 
 # Retrieve token and root_asset_id from a local .env file.
-# If you haven't worked with root_asset_id read this guide: https://docs.frame.io/docs/root-asset-ids 
+# If you don't know what root_asset_id is, read this guide: https://docs.frame.io/docs/root-asset-ids 
 token = getenv('FRAME_IO_TOKEN')
 root_asset_id = getenv('ROOT_ASSET_ID')
 
 
 def build_comments_list(client, asset_id, comment_list):
-# Function for grabbing comments from assets. It's used by
-# get_all_project_comments. It takes an initialized client,
-# asset_id, and reference to an empty list. It returns
-# comments on all assets.
+    """
+    Takes an initialized client, recursively builds a list of comments
+    and returns the list. (Technically, it's a list of dicts)
+    """
     assets = client.get_asset_children(asset_id)
 
     for asset in assets:
-        # Recurse through folders but skip empty ones
+        # Recurse through folders but skip the empty ones
         if asset['type'] == "folder" and asset['item_count'] > 0:
             build_comments_list(client, asset['id'], comment_list)
-
-# You can't get the asset name or parent ID from the `get_comments` call, so we'll add
-# them to the comment dictionary now.
 
         if asset['type'] == "file" and asset['comment_count'] > 0:
             comments = client.get_comments(asset['id'])
             for comment in comments:
+                # The 'get_comments" call won't return the asset name or parent ID
+                # So we'll add them to the dictionary now. 
                 comment['parent_id'] = asset['parent_id']
                 comment['name'] = asset['name']
                 comment_list.append(comment)
 
         if asset['type'] == "version_stack":
-
-# Note about version stacks
-
+            # Read about version stacks: https://docs.frame.io/docs/managing-version-stacks
             versions = client.get_asset_children(asset['id'])
             for v_asset in versions:
                 comments = client.get_comments(v_asset['id'])
@@ -49,11 +50,10 @@ def build_comments_list(client, asset_id, comment_list):
 
     return comment_list
 
-# Takes a root asset ID for a project and a developer token.
-# Returns a comment list with all assets.
 
 def flatten_dict(d):
-# Neeed to flatten dictionary because of data structure of API.  Owner has nested attributes with same name as base level.
+    # The get_comments API response is verbose and contains a lot of information about comment owner.
+    # This functon flattens the dict holding the API response and properly namespaces the attributes.
 
     def expand(key, val):
             if isinstance(val, dict):
@@ -65,43 +65,31 @@ def flatten_dict(d):
 
     return dict(items)
 
-def get_all_project_comments(root_asset_id, token):
-    comment_list = []
-    client = FrameioClient(token)
 
-    build_comments_list(client, root_asset_id, comment_list)
+def write_comments_csv(c_list):
+    # Writes comments to comments.csv
+    # Any attributes you add to the headers list will automatically be written to the CSV
+    # The API returns many attributes so familiarize with the response data!
+    headers = ['text', 'name', 'inserted_at', 'timestamp', 'has_replies', 'parent_id', 'owner.name', 'owner.email', 'owner_id', 'owner.account_id']
 
-    return comment_list
+    # Flattening the comments dicts is not at all necessary, but the namespacing
+    # makes the CSV headers much more readable.
+    flat_comments_list = []
+    for c in c_list:
+        flat_comments_list.append(flatten_dict(c))
 
-# Declare a client
+    with open('comments.csv', 'w') as file:
+        f_csv = csv.DictWriter(file, headers, extrasaction='ignore')
+        f_csv.writeheader()
+        f_csv.writerows(flat_comments_list)
+
+
+# Initialize the client library
 client = FrameioClient(token)
 
-# Collect all comments, still formatted like API data which we will need to flatten
-comment_list = []
-comments = build_comments_list(client, root_asset_id, comment_list)
+# Build the comments list
+comments = []
+comments_list = build_comments_list(client, root_asset_id, comments)
 
-
-# Get all the comments on the project you choose by providing a root asset ID and a developer token.
-
-# responses = get_all_project_comments(root_asset_id, token)
-
-# Now we can use list comprehension to grab what we want from each block in the list and make a new flat list.
-# list_for_csv = [[o['text'], o['parent_id'], o['asset_id'], o['name'], o['owner_id'], o['owner']['email'], o['timestamp'], o['updated_at']] for o in flat_response_list]
-
-
-
-
-# Flatten
-# This is not strictly necessary, but the API returns an owners dict of objects and some attributes have the same name
-# as the comment attributes.  This way all the attribute names are clearly namespaced.
-flattened_comments = []
-for c in comment_list:
-    flattened_comments.append(flatten_dict(c))
-
-headers = ['text', 'name', 'inserted_at', 'timestamp', 'has_replies', 'parent_id', 'owner.name', 'owner.email', 'owner_id', 'owner.account_id']
-
-# Let's write our new list out to a .csv file. We'll add a heading.
-with open('comments.csv', 'w') as file:
-    f_csv = csv.DictWriter(file, headers, extrasaction='ignore')
-    f_csv.writeheader()
-    f_csv.writerows(flattened_comments)
+# Write the comments to comments.csv
+write_comments_csv(comments_list)
