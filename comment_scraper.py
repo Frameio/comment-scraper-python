@@ -12,9 +12,9 @@ from os import getenv
 from itertools import chain
 
 # Retrieve token and root_asset_id from a local .env file.
-# If you don't know what root_asset_id is, read this guide: https://docs.frame.io/docs/root-asset-ids 
-token = getenv('FRAME_IO_TOKEN')
-root_asset_id = getenv('ROOT_ASSET_ID')
+# If you don't know what Root Asset ID is, read this guide: https://docs.frame.io/docs/root-asset-ids 
+TOKEN = getenv('FRAME_IO_TOKEN')
+ROOT_ASSET_ID = getenv('ROOT_ASSET_ID')
 
 
 def build_comments_list(client, asset_id, comment_list):
@@ -52,8 +52,9 @@ def build_comments_list(client, asset_id, comment_list):
 
 
 def flatten_dict(d):
-    # The get_comments API response is verbose and contains a lot of information about comment owner.
-    # This functon flattens the dict holding the API response and properly namespaces the attributes.
+    # The get_comments API response is verbose and contains nested objects.
+    # Use this helper functon to flatten the dict holding the API response data
+    # and namespace the attributes.
 
     def expand(key, val):
             if isinstance(val, dict):
@@ -85,11 +86,11 @@ def write_comments_csv(c_list):
 
 
 # Initialize the client library
-client = FrameioClient(token)
+client = FrameioClient(TOKEN)
 
 # Build the comments list
 comments = []
-comments_list = build_comments_list(client, root_asset_id, comments)
+comments_list = build_comments_list(client, ROOT_ASSET_ID, comments)
 
 # Write the comments to comments.csv
 write_comments_csv(comments_list)
