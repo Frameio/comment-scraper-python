@@ -35,6 +35,6 @@ The sample is written in Python 3. You run it by doing the following:
 
 1. Run the sample with `$ python comment_scrape.py`
 
-2. Retrieve the .csv file. It will appear in the same folder that you run comment_scrape.py from and be named **output.csv**.
+2. Retrieve the .csv file. It will appear in the same folder that you run comment_scrape.py from and be named **comments.csv**.
 
 
