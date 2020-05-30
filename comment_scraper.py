@@ -7,7 +7,7 @@
 
 
 from frameioclient import FrameioClient
-import requests, json, csv
+import csv
 from os import getenv
 from itertools import chain
 
