@@ -35,10 +35,9 @@ def build_comments_list(client, asset_id, comment_list):
         if (asset['type'] == 'file') and (asset['comment_count'] > 0):
             comments = client.get_comments(asset['id'])
             for comment in comments:
-                # The 'get_comments" call won't return the asset name or parent ID
-                # So we'll add them to the dictionary now. 
-                comment['parent_id'] = asset['parent_id']
-                comment['name'] = asset['name']
+                # The 'get_comments" call won't return the asset name
+                # So we'll add it to the dictionary now.
+                comment['asset'] = { 'name': asset['name'] }
                 comment_list.append(comment)
 
         if asset['type'] == 'version_stack':
@@ -47,8 +46,7 @@ def build_comments_list(client, asset_id, comment_list):
             for v_asset in versions:
                 comments = client.get_comments(v_asset['id'])
                 for comment in comments:
-                    comment['parent_id'] = v_asset['parent_id']
-                    comment['name'] = v_asset['name']
+                    comment['asset'] = { 'name': asset['name'] }
                     comment_list.append(comment)
 
     return comment_list
@@ -74,7 +72,7 @@ def write_comments_csv(c_list):
     # Writes comments to comments.csv
     # Any attributes you add to the headers list will automatically be written to the CSV
     # The API returns many attributes so familiarize yourself with the response data: https://docs.frame.io/reference#getcomments
-    headers = ['text', 'name', 'inserted_at', 'timestamp', 'has_replies', 'parent_id', 'owner.name', 'owner.email', 'owner_id', 'owner.account_id']
+    headers = ['text', 'inserted_at', 'timestamp', 'has_replies', 'parent_id', 'asset.name', 'asset_id', 'owner.name', 'owner.email', 'owner_id', 'owner.account_id']
 
     # Flattening the comments dicts is not at all necessary, but the namespacing
     # makes the CSV headers much more readable.
