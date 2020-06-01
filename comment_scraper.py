@@ -7,10 +7,18 @@
 
 
 import csv
-from os import getenv
+import os
 from itertools import chain
 
 from frameioclient import FrameioClient
+
+class ClientNotTokenized(Exception):
+    pass
+
+
+class RootAssetIDNotFound(Exception):
+    pass
+
 
 def build_comments_list(client, asset_id, comment_list):
     """
@@ -65,7 +73,7 @@ def flatten_dict(d):
 def write_comments_csv(c_list):
     # Writes comments to comments.csv
     # Any attributes you add to the headers list will automatically be written to the CSV
-    # The API returns many attributes so familiarize with the response data!
+    # The API returns many attributes so familiarize yourself with the response data: https://docs.frame.io/reference#getcomments
     headers = ['text', 'name', 'inserted_at', 'timestamp', 'has_replies', 'parent_id', 'owner.name', 'owner.email', 'owner_id', 'owner.account_id']
 
     # Flattening the comments dicts is not at all necessary, but the namespacing
@@ -80,12 +88,14 @@ def write_comments_csv(c_list):
         f_csv.writerows(flat_comments_list)
 
 
-if __name__ = __main__:
+if __name__ == "__main__":
 
-    # Retrieve token and root_asset_id from a local .env file.
-    # If you don't know what Root Asset ID is, read this guide: https://docs.frame.io/docs/root-asset-ids 
-    TOKEN = getenv('FRAME_IO_TOKEN')
-    ROOT_ASSET_ID = getenv('ROOT_ASSET_ID')
+    TOKEN = os.getenv('FRAME_IO_TOKEN')
+    if os.environ.get('FRAME_IO_TOKEN') == None:
+        raise ClientNotTokenized("The Python SDK requires a valid developer token.")
+    ROOT_ASSET_ID = os.getenv('ROOT_ASSET_ID')
+    if os.environ.get('ROOT_ASSET_ID') == None:
+        raise RootAssetIDNotFound("If you don't know what Root Asset ID is, read this guide: https://docs.frame.io/docs/root-asset-ids")
 
     # Initialize the client library
     client = FrameioClient(TOKEN)
