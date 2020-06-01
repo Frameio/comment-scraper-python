@@ -6,16 +6,11 @@
 ###################################
 
 
-from frameioclient import FrameioClient
 import csv
 from os import getenv
 from itertools import chain
 
-# Retrieve token and root_asset_id from a local .env file.
-# If you don't know what Root Asset ID is, read this guide: https://docs.frame.io/docs/root-asset-ids 
-TOKEN = getenv('FRAME_IO_TOKEN')
-ROOT_ASSET_ID = getenv('ROOT_ASSET_ID')
-
+from frameioclient import FrameioClient
 
 def build_comments_list(client, asset_id, comment_list):
     """
@@ -85,12 +80,19 @@ def write_comments_csv(c_list):
         f_csv.writerows(flat_comments_list)
 
 
-# Initialize the client library
-client = FrameioClient(TOKEN)
+if __name__ = __main__:
 
-# Build the comments list
-comments = []
-comments_list = build_comments_list(client, ROOT_ASSET_ID, comments)
+    # Retrieve token and root_asset_id from a local .env file.
+    # If you don't know what Root Asset ID is, read this guide: https://docs.frame.io/docs/root-asset-ids 
+    TOKEN = getenv('FRAME_IO_TOKEN')
+    ROOT_ASSET_ID = getenv('ROOT_ASSET_ID')
 
-# Write the comments to comments.csv
-write_comments_csv(comments_list)
+    # Initialize the client library
+    client = FrameioClient(TOKEN)
+
+    # Build the comments list
+    comments = []
+    comments_list = build_comments_list(client, ROOT_ASSET_ID, comments)
+
+    # Write the comments to comments.csv
+    write_comments_csv(comments_list)
