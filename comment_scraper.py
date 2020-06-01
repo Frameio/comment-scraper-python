@@ -29,10 +29,10 @@ def build_comments_list(client, asset_id, comment_list):
 
     for asset in assets:
         # Recurse through folders but skip the empty ones
-        if asset['type'] == "folder" and asset['item_count'] > 0:
+        if (asset['type'] == 'folder') and (asset['item_count'] > 0):
             build_comments_list(client, asset['id'], comment_list)
 
-        if asset['type'] == "file" and asset['comment_count'] > 0:
+        if (asset['type'] == 'file') and (asset['comment_count'] > 0):
             comments = client.get_comments(asset['id'])
             for comment in comments:
                 # The 'get_comments" call won't return the asset name or parent ID
@@ -41,7 +41,7 @@ def build_comments_list(client, asset_id, comment_list):
                 comment['name'] = asset['name']
                 comment_list.append(comment)
 
-        if asset['type'] == "version_stack":
+        if asset['type'] == 'version_stack':
             # Read about version stacks: https://docs.frame.io/docs/managing-version-stacks
             versions = client.get_asset_children(asset['id'])
             for v_asset in versions:
@@ -88,14 +88,14 @@ def write_comments_csv(c_list):
         f_csv.writerows(flat_comments_list)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     TOKEN = os.getenv('FRAME_IO_TOKEN')
     if os.environ.get('FRAME_IO_TOKEN') == None:
-        raise ClientNotTokenized("The Python SDK requires a valid developer token.")
+        raise ClientNotTokenized('The Python SDK requires a valid developer token.')
     ROOT_ASSET_ID = os.getenv('ROOT_ASSET_ID')
     if os.environ.get('ROOT_ASSET_ID') == None:
-        raise RootAssetIDNotFound("If you don't know what Root Asset ID is, read this guide: https://docs.frame.io/docs/root-asset-ids")
+        raise RootAssetIDNotFound('If you don\'t know what Root Asset ID is, read this guide: https://docs.frame.io/docs/root-asset-ids')
 
     # Initialize the client library
     client = FrameioClient(TOKEN)
