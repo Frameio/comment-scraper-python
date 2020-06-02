@@ -29,10 +29,10 @@ def build_comments_list(client, asset_id, comment_list):
 
     for asset in assets:
         # Recurse through folders but skip the empty ones
-        if (asset['type'] == 'folder') and (asset['item_count'] > 0):
+        if (asset.get('type') == 'folder') and (asset.get('item_count') > 0):
             build_comments_list(client, asset['id'], comment_list)
 
-        if (asset['type'] == 'file') and (asset['comment_count'] > 0):
+        if asset.get('type') == 'file' and asset.get('comment_count') > 0:
             comments = client.get_comments(asset['id'])
             for comment in comments:
                 # The 'get_comments" call won't return the asset name
@@ -40,7 +40,7 @@ def build_comments_list(client, asset_id, comment_list):
                 comment['asset'] = { 'name': asset['name'] }
                 comment_list.append(comment)
 
-        if asset['type'] == 'version_stack':
+        if asset.get('type') == 'version_stack':
             # Read about version stacks: https://docs.frame.io/docs/managing-version-stacks
             versions = client.get_asset_children(asset['id'])
             for v_asset in versions:
