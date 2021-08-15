@@ -89,10 +89,10 @@ def write_comments_csv(c_list):
 if __name__ == '__main__':
 
     TOKEN = os.getenv('FRAME_IO_TOKEN')
-    if os.environ.get('FRAME_IO_TOKEN') == None:
+    if TOKEN == None:
         raise ClientNotTokenized('The Python SDK requires a valid developer token.')
     ROOT_ASSET_ID = os.getenv('ROOT_ASSET_ID')
-    if os.environ.get('ROOT_ASSET_ID') == None:
+    if ROOT_ASSET_ID == None:
         raise RootAssetIDNotFound('If you don\'t know what Root Asset ID is, read this guide: https://docs.frame.io/docs/root-asset-ids')
 
     # Initialize the client library
